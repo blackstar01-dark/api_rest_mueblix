@@ -1,5 +1,5 @@
 const Usuario = require('../../models/usuario');
-const blacklistedToken = require('../../models/BlacklistedToken');
+const BlacklistedToken = require('../../models/BlacklistedToken');
 const jwt = require('jsonwebtoken');
 
 async function loginCliente(req, res) {
@@ -28,14 +28,12 @@ async function logoutCliente(req, res) {
         }
 
         const decoded = jwt.decode(token);
-
         if(!decoded){
             return res.status(401).json({message: 'Token inválido'});
         }
-        
         const expiresAt = new Date(decoded.exp * 1000);
 
-        await blacklistedToken.create({token, expiresAt});
+        await BlacklistedToken.create({token, expiresAt});
 
         res.status(200).json({message: 'Cierre de sesión exitoso'});
     } catch (error) {
