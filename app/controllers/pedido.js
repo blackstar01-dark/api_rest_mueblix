@@ -3,12 +3,18 @@ const Pedido = require('../../models/pedido');
 async function indexPedido(req, res) {
     try {
         const userId = req.userId;
-        const pedido = await Pedido.find({ usuario: userId}).populate('producto').populate('usuario');
-        res.status(200).json({message: 'Pedidos encontrados', data: pedido})
+        console.log('userId en indexPedido:', userId); // <- agrega esto para debug
+        const pedidos = await Pedido.find({ usuario: userId })
+                                    .populate('producto')
+                                    .populate('usuario')
+                                    .lean();
+        res.status(200).json(pedidos);
     } catch (error) {
-        res.status(400).json({message: 'Error en la consulta', data: error})        
-    }   
+        console.error('Error al consultar pedidos:', error);
+        res.status(400).json({ message: 'Error en la consulta', data: error });
+    }
 }
+
 
 async function showPedido(req, res) {
     const id = req.params.id;
@@ -27,11 +33,25 @@ async function showPedido(req, res) {
 async function postPedido(req, res) {
     const body = req.body;
     const userId = req.userId;
+
+    if (!userId) {
+        return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
+
     try {
-        const pedido = await Pedido.create(body)
-        res.status(200).json({message: 'Pedido creado', data: pedido})
+        const pedido = await Pedido.create({
+            usuario: userId,
+            producto: body.producto, // ya son IDs, no hacer map
+            cantidad: body.cantidad,  // envía la cantidad desde Angular
+            total: body.total,
+            estado: body.estado,
+            pago: body.pago
+        });
+
+        res.status(200).json({ message: 'Pedido creado', data: pedido });
     } catch (error) {
-        res.status(400).json({message: 'Error al crear pedido', data: error})
+        console.error('Error al crear pedido:', error);
+        res.status(400).json({ message: 'Error al crear pedido', data: error });
     }
 }
 

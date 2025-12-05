@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Categoria = require('./categoria');
 const { Schema } = mongoose;
 
 const productosSchema = new Schema({
@@ -12,7 +13,7 @@ const productosSchema = new Schema({
         color: {type: String, required: true},
         peso: {type: Number, required: true},
     },
-    categoria: {type: String, required: true, index: true},
+    categoria: {type: Schema.Types.ObjectId, ref: 'Categoria', required: true, index: true},
     imagen: [{type: String, required: true}],  
     sensor: {type: Schema.Types.ObjectId, ref: 'Sensor', required: true},
 }, {timestamps: true});
